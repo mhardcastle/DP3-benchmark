@@ -1,0 +1,332 @@
+# Singularity script originally for ddf-pipeline written by
+# M. Hardcastle, modified by C. Tasse, modified again and adapted for
+# this repo by M. Hardcastle again
+
+Bootstrap: docker
+From: debian:bullseye
+
+%post -c /bin/bash
+    CUSTOM_ENV=/.singularity.d/env/99-zz_custom_env.sh
+    cat >$CUSTOM_ENV <<EOF
+#!/bin/bash
+PS1="\[\e[1;92m\][DP3-benchmark Singularity]\[\e[m\] \u@\h:\w\$ "
+EOF
+    chmod 755 $CUSTOM_ENV
+    
+%environment
+   export SRC=/usr/local/src
+   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/:/usr/local/idg/lib/
+   
+%files
+
+%post
+   export DEBIAN_FRONTEND=noninteractive
+   export J=90
+   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/:/usr/local/idg/lib/
+   export SRC=/usr/local/src
+   
+   $SRC
+
+
+   ls $SRC
+  echo "Here we are installing software and other dependencies for the container!"
+   apt-get update
+
+
+
+
+apt install -y boxes
+#apt install -y spyder
+
+apt install -y openssh-client 
+eval `ssh-agent -s`
+ssh-add
+
+
+apt-get install -y git mlocate
+
+
+apt-get install -y emacs htop nano mc \
+    git \
+    wget \
+    rsync \
+    python3-pip \
+    vim \
+    libfftw3-dev \
+    python3-numpy \
+    libfreetype6-dev \
+    libpng-dev \
+    pkg-config \
+    python3-dev \
+    libboost-all-dev \
+    libcfitsio-dev \
+    wcslib-dev \
+    libatlas-base-dev \
+    liblapack-dev \
+    python3-tk \
+    libreadline6-dev \
+    liblog4cplus-dev \
+    libhdf5-dev \
+    libncurses5-dev \
+    libssl-dev \
+    flex \
+    bison \
+    libbison-dev \
+    python3-matplotlib \
+    python3-numexpr \
+    python3-astropy \
+    python3-cpuinfo \
+    python3-future \
+    python3-lxml \
+    python3-pandas \
+    python3-psutil \
+    python3-pyfftw python3-pymysql  \
+    python3-requests  \
+    python3-sshtunnel \
+    python3-ruamel.yaml python3-ephem \
+    python3-venv \
+    bzip2 \
+    ipython3 \
+    libgsl-dev \
+    libgtkmm-3.0-dev \
+    libcfitsio-bin libxml2-dev libarmadillo-dev libsigc++-2.0-dev liblua5.3-dev libxslt-dev tcl zip libbz2-dev
+    #saods9 
+   update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1
+   apt-get install -y casacore-dev casacore-data casacore-tools python3-casacore cmake curl
+   apt-get install -y python3-astlib python3-ipdb python3-nose python3-metaconfig jq util-linux bsdmainutils evince ristretto imagemagick
+
+  # fitsio
+  cd $SRC
+  git clone https://github.com/esheldon/fitsio.git
+  cd fitsio
+  python setup.py install
+
+
+
+   
+  echo
+  echo
+  echo
+  pip3 show numpy scipy
+  echo
+  echo
+  echo
+    pip3 install scikit-image==0.19.3
+  pip3 show numpy scipy
+    pip3 install Pillow==9.3.0
+  pip3 show numpy scipy
+  echo
+  echo
+  echo
+  pip show numpy scipy
+  echo
+  echo
+  echo
+  pip3 install reproject==0.10.0
+  echo
+  echo
+  echo
+  pip show numpy scipy
+  echo
+  echo
+  echo
+   pip3 install aplpy==2.1.0
+  echo
+  echo
+  echo
+  pip show numpy scipy
+  echo
+  echo
+  echo
+  
+  pip3 install pybind11==2.9.2
+   pip3 install dask codex_africanus==0.2.10 "ephem<=9.99" "Polygon3<=3.0.9.1" pyregion terminal "pyephem<=9.99" "ptyprocess<=0.7.0" timeout-decorator astroquery # pyfits
+   pip3 install --ignore-installed numpy==1.19.5 scipy==1.5.4 deap==1.3.1
+   pip3 install reproject
+   pip3 install meqtrees-cattery==1.7.6
+   pip3 install "regions<=0.5" "pywavelets<=1.1.1" "tqdm<=4.64.0" "configparser<=5.2.0"
+  cd $SRC
+
+
+  echo
+  echo
+  echo
+  pip show numpy scipy
+  echo
+  echo
+  echo
+
+
+  # tools
+  cd $SRC
+  git clone https://github.com/IanHeywood/ms_info.git
+
+  
+
+# LSMTool 
+   cd $SRC
+   git clone https://github.com/darafferty/LSMTool.git
+   cd LSMTool
+   python setup.py install
+
+  echo
+  echo
+  echo
+  pip show numpy scipy
+  echo
+  echo
+  echo
+  
+   # LofarStMan
+   cd $SRC
+   git clone https://github.com/lofar-astron/LofarStMan.git
+   cd LofarStMan
+   mkdir cbuild; cd cbuild
+   cmake ..
+   make -j $J
+   make install
+
+  echo
+  echo
+  echo
+  pip show numpy scipy
+  echo
+  echo
+  echo
+
+# LOFAR beam -- for DDF
+   cd $SRC
+   git clone -b v4.1.1 https://github.com/lofar-astron/LOFARBeam.git
+   cd LOFARBeam
+   mkdir build
+   cd build
+   cmake ..
+   make -j $J
+   make install
+
+  echo
+  echo
+  echo
+  pip show numpy scipy
+  echo
+  echo
+  echo
+
+cd /usr/local/lib/python3.9/dist-packages
+   ln -s /usr/local/lib/python3.9/site-packages/lofar
+
+  echo
+  echo
+  echo
+  pip show numpy scipy
+  echo
+  echo
+  echo
+
+# dysco -- for DP3
+   cd $SRC
+   git clone https://github.com/aroffringa/dysco.git
+   cd dysco
+   git checkout 3fd7a5fd17f3d09db89ad7827c9bdc4febf66eff
+   mkdir build
+   cd build
+   cmake ../
+   make -j $J
+   make install
+   cp $SRC/dysco/build/decompress /usr/local/bin/decompress  # https://github.com/aroffringa/dysco/issues/12#issuecomment-773134161
+
+
+  echo
+  echo
+  echo
+  pip show numpy scipy
+  echo
+  echo
+  echo
+
+
+   # IDG -- for wsclean and DP3
+   cd $SRC
+   git clone -b 0.8 https://gitlab.com/astron-idg/idg.git
+   cd idg && mkdir build && cd build
+   #   cmake -DCMAKE_INSTALL_PREFIX=/usr/local/idg/ ..
+   cmake ..
+   make -j $J
+   make install
+
+  echo
+  echo
+  echo
+  pip show numpy scipy
+  echo
+  echo
+  echo
+
+
+# aoflagger -- for DP3
+   cd $SRC
+   git clone -b v3.1.0 https://gitlab.com/aroffringa/aoflagger.git
+   cd aoflagger
+   mkdir build
+   cd build
+   cmake ..
+   make -j $J
+   make install
+
+  echo
+  echo
+  echo
+  pip show numpy scipy
+  echo
+  echo
+  echo
+
+
+   # Everybeam -- for DP3
+   cd $SRC
+   #git clone -b v0.1.3 https://git.astron.nl/RD/EveryBeam.git
+   git clone https://git.astron.nl/RD/EveryBeam.git
+   cd EveryBeam
+   #   git checkout d75cfa914aa84c556467298237333c2308b592b5
+   mkdir build
+   cd build
+   cmake -DBUILD_WITH_PYTHON=On ..
+   make -j $J
+   make install
+
+  echo
+  echo
+  echo
+  pip show numpy scipy
+  echo
+  echo
+  echo
+
+
+   # DP3
+   cd $SRC
+   #git clone -b v5.1 https://github.com/lofar-astron/DP3.git
+   git clone https://github.com/lofar-astron/DP3.git
+   cd DP3
+   mkdir build
+   cd build
+   #   cmake .. -DCMAKE_PREFIX_PATH=/usr/local/idg
+   cmake ..
+   make -j $J
+   make install
+
+
+  pip3 cache purge
+  #apt-get purge -y cmake
+  apt-get -y autoremove
+  rm -rf /var/lib/apt/lists/*
+  rm -rf /root/.ssh
+  bash -c "rm -rf /usr/local/src/{DP3,EveryBeam,LOFARBeam,aoflagger,dysco,idg}/" # DDFacet,killMS
+
+
+  cd $SRC
+  git clone https://github.com/mhardcastle/DP3-benchmark.git
+  cp DP3-benchmark/DP3_benchmark.py /usr/local/bin
+
+%runscript
+  /usr/local/bin/DP3_benchmark.py $*
