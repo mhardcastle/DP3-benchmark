@@ -4,6 +4,7 @@ import sys
 import os
 from tqdm import tqdm
 import time
+import numpy as np
 
 # This script is supplied with two arguments -- a working directory
 # and an optional operation to carry out.
@@ -43,13 +44,15 @@ if __name__=='__main__':
     elif operation=='benchmark':
         if not os.path.isdir('test.ms'):
             download()
-        ts=0
+        times=[]
         count=5
         for i in tqdm(range(count)):
             os.system('rm -r test2.ms')
             st=time.time()
             os.system('DP3 numthreads=8 msin=test.ms msout=test2.ms steps=[ave] msin.datacolumn=DATA msout.datacolumn=DATA ave.type=averager ave.freqstep=8')
             et=time.time()
-            ts+=(et-st)
-        print('Average execution time %f seconds' % (ts/count))
+            times.append(et-st)
+        print('Average execution time %f seconds' % np.mean(times))
+        print('Max execution time %f seconds' % np.max(times))
+        print('Std dev of execution time %f seconds' % np.std(times))
             
