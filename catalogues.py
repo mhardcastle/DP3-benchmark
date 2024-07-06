@@ -3,19 +3,16 @@ import os
 from tqdm import tqdm
 import time
 import glob
-from astropy.io import fits
+from astropy.table import Table
 import numpy as np
 
 def download():
-    result=os.system('wget https://uhhpc.herts.ac.uk/~mjh/clusters.tar')
+    result=os.system('wget https://lofar-surveys.org/public/DR2/catalogues/combined-release-v1.1-LM_opt_mass.fits')
     if result!=0:
         raise RuntimeError('Download failed!')
-    result=os.system('tar xvf clusters.tar')
-    if result!=0:
-        raise RuntimeError('Untar failed!')
 
 if __name__=='__main__':
-    print('Running toy FITS image processing benchmark')
+    print('Running toy catalogue processing benchmark')
     try:
         wd=sys.argv[1]
     except IndexError:
@@ -37,11 +34,6 @@ if __name__=='__main__':
     if operation=='download':
         download()
     elif operation=='benchmark':
-        files=glob.glob('*-mosaic.fits')
-        if len(files)==0:
-            download()
-            files=glob.glob('*-mosaic.fits')
-
         times=[]
         count=5
         outfile='output.fits'
@@ -49,18 +41,10 @@ if __name__=='__main__':
             if os.path.isfile(outfile):
                 os.unlink(outfile)
             st=time.time()
-            for i,f in enumerate(files):
-                hdu=fits.open(f)
-                if not i:
-                    isum=np.where(np.isnan(hdu[0].data),0,hdu[0].data)
-                    count=np.where(np.isnan(hdu[0].data),0,1)
-                else:
-                    isum+=np.where(np.isnan(hdu[0].data),0,hdu[0].data)
-                    count+=np.where(np.isnan(hdu[0].data),0,1)
-            isum/=count
-            hdu[0].data=isum
-            hdu[0].header['OBJECT']='STACK'
-            hdu.writeto(outfile)
+            t=Table.read('combined-release-v1.1-LM_opt_mass.fits')
+            # compute a new column
+            t['new_column']=t['L_144']/10**t['Mass_median']
+            t.write(outfile)
             et=time.time()
             times.append(et-st)
         print('Average execution time %f seconds' % np.mean(times))
