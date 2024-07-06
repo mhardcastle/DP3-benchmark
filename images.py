@@ -7,10 +7,10 @@ from astropy.io import fits
 import numpy as np
 
 def download():
-    result=os.system('wget https://uhhpc.herts.ac.uk/~mjh/test.tar')
+    result=os.system('wget https://uhhpc.herts.ac.uk/~mjh/clusters.tar')
     if result!=0:
         raise RuntimeError('Download failed!')
-    result=os.system('tar xvf test.tar')
+    result=os.system('tar xvf clusters.tar')
     if result!=0:
         raise RuntimeError('Untar failed!')
 
@@ -50,13 +50,13 @@ if __name__=='__main__':
             for i,f in enumerate(files):
                 hdu=fits.open(f)
                 if not i:
-                    sum=np.where(np.isnan(hdu[0].data),0,hdu[0].data)
+                    isum=np.where(np.isnan(hdu[0].data),0,hdu[0].data)
                     count=np.where(np.isnan(hdu[0].data),0,1)
                 else:
-                    sum+=np.where(np.isnan(hdu[0].data),0,hdu[0].data)
+                    isum+=np.where(np.isnan(hdu[0].data),0,hdu[0].data)
                     count+=np.where(np.isnan(hdu[0].data),0,1)
-            sum/=count
-            hdu[0].data=sum
+            isum/=count
+            hdu[0].data=isum
             hdu[0].header['OBJECT']='STACK'
             hdu.writeto('output.fits')
             et=time.time()

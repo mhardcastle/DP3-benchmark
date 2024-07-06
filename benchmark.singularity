@@ -1,6 +1,6 @@
 # Singularity script originally for ddf-pipeline written by
 # M. Hardcastle, modified by C. Tasse, modified again and adapted for
-# this repo by M. Hardcastle again
+# this repo by M. Hardcastle
 
 Bootstrap: docker
 From: debian:bullseye
@@ -9,7 +9,7 @@ From: debian:bullseye
     CUSTOM_ENV=/.singularity.d/env/99-zz_custom_env.sh
     cat >$CUSTOM_ENV <<EOF
 #!/bin/bash
-PS1="\[\e[1;92m\][DP3-benchmark Singularity]\[\e[m\] \u@\h:\w\$ "
+PS1="\[\e[1;92m\][Benchmark singularity]\[\e[m\] \u@\h:\w\$ "
 EOF
     chmod 755 $CUSTOM_ENV
     
